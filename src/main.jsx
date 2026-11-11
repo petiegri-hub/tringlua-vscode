@@ -1,58 +1,344 @@
-import React, {useMemo,useState} from 'react';
-import {createRoot} from 'react-dom/client';
-import {BookOpen,Target,ClipboardList,Layers,ChartColumn,Settings,House,Search,ChevronRight,Check,ArrowLeft,ArrowRight,Flame} from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import {
+  ArrowLeft, ArrowRight, BookOpen, ChartColumn, Check, ChevronRight,
+  ClipboardList, Flame, House, Layers, Search, Settings, Target
+} from 'lucide-react';
 import './style.css';
 
-const vocab=[
-{hu:'repülőtér',de:'der Flughafen',en:'the airport',level:'A1',topic:'Utazás',ex:{hu:'A repülőtér a város mellett van.',de:'Der Flughafen liegt neben der Stadt.',en:'The airport is near the city.'}},
-{hu:'szálloda',de:'das Hotel',en:'the hotel',level:'A1',topic:'Utazás',ex:{hu:'A szálloda modern és kényelmes.',de:'Das Hotel ist modern und bequem.',en:'The hotel is modern and comfortable.'}},
-{hu:'jegy',de:'das Ticket',en:'the ticket',level:'A1',topic:'Utazás',ex:{hu:'Van egy jegyem Berlinbe.',de:'Ich habe ein Ticket nach Berlin.',en:'I have a ticket to Berlin.'}},
-{hu:'állomás',de:'der Bahnhof',en:'the station',level:'A1',topic:'Utazás',ex:{hu:'Az állomás a központban van.',de:'Der Bahnhof ist im Zentrum.',en:'The station is in the center.'}},
-{hu:'reggeli',de:'das Frühstück',en:'breakfast',level:'A1',topic:'Étel',ex:{hu:'A reggeli hét órakor kezdődik.',de:'Das Frühstück beginnt um sieben Uhr.',en:'Breakfast starts at seven.'}},
-{hu:'víz',de:'das Wasser',en:'water',level:'A1',topic:'Étel',ex:{hu:'Kérek egy pohár vizet.',de:'Ich möchte ein Glas Wasser.',en:"I'd like a glass of water."}},
-{hu:'barát',de:'der Freund',en:'the friend',level:'A1',topic:'Emberek',ex:{hu:'A barátom Budapesten él.',de:'Mein Freund wohnt in Budapest.',en:'My friend lives in Budapest.'}},
-{hu:'család',de:'die Familie',en:'the family',level:'A1',topic:'Emberek',ex:{hu:'A családom nagy.',de:'Meine Familie ist groß.',en:'My family is big.'}},
-{hu:'munka',de:'die Arbeit',en:'work',level:'A1',topic:'Munka',ex:{hu:'Ma sok munkám van.',de:'Ich habe heute viel Arbeit.',en:'I have a lot of work today.'}},
-{hu:'tanulni',de:'lernen',en:'to learn',level:'A1',topic:'Tanulás',ex:{hu:'Minden nap németül tanulok.',de:'Ich lerne jeden Tag Deutsch.',en:'I learn German every day.'}},
-{hu:'kérdezni',de:'fragen',en:'to ask',level:'A1',topic:'Kommunikáció',ex:{hu:'Szeretnék valamit kérdezni.',de:'Ich möchte etwas fragen.',en:'I would like to ask something.'}},
-{hu:'megérteni',de:'verstehen',en:'to understand',level:'A1',topic:'Kommunikáció',ex:{hu:'Nem értem ezt a mondatot.',de:'Ich verstehe diesen Satz nicht.',en:"I don't understand this sentence."}},
-{hu:'fontos',de:'wichtig',en:'important',level:'A2',topic:'Általános',ex:{hu:'Fontos, hogy időben érkezzünk.',de:'Es ist wichtig, pünktlich anzukommen.',en:'It is important to arrive on time.'}},
-{hu:'lehetőség',de:'die Möglichkeit',en:'the opportunity',level:'A2',topic:'Általános',ex:{hu:'Ez jó lehetőség a fejlődésre.',de:'Das ist eine gute Möglichkeit, sich weiterzuentwickeln.',en:'This is a good opportunity to develop.'}},
-{hu:'egészség',de:'die Gesundheit',en:'health',level:'A2',topic:'Egészség',ex:{hu:'Az egészség fontosabb, mint a pénz.',de:'Gesundheit ist wichtiger als Geld.',en:'Health is more important than money.'}},
-{hu:'megbeszélés',de:'die Besprechung',en:'the meeting',level:'A2',topic:'Munka',ex:{hu:'A megbeszélés délben kezdődik.',de:'Die Besprechung beginnt um zwölf.',en:'The meeting starts at noon.'}},
-{hu:'döntést hozni',de:'eine Entscheidung treffen',en:'to make a decision',level:'B1',topic:'Munka',ex:{hu:'Holnap döntést kell hoznunk.',de:'Morgen müssen wir eine Entscheidung treffen.',en:'We have to make a decision tomorrow.'}},
-{hu:'felelősség',de:'die Verantwortung',en:'responsibility',level:'B1',topic:'Munka',ex:{hu:'A vezető nagy felelősséget vállal.',de:'Die Führungskraft übernimmt große Verantwortung.',en:'The manager takes on great responsibility.'}},
-{hu:'összefüggés',de:'der Zusammenhang',en:'the connection',level:'B1',topic:'Akadémiai',ex:{hu:'Meg kell értenünk az összefüggéseket.',de:'Wir müssen die Zusammenhänge verstehen.',en:'We need to understand the connections.'}},
-{hu:'következtetés',de:'die Schlussfolgerung',en:'the conclusion',level:'B2',topic:'Akadémiai',ex:{hu:'A kutatás fontos következtetésre jutott.',de:'Die Forschung kam zu einer wichtigen Schlussfolgerung.',en:'The research reached an important conclusion.'}},
-{hu:'megvalósítható',de:'umsetzbar',en:'feasible',level:'B2',topic:'Üzlet',ex:{hu:'A javaslat pénzügyileg megvalósítható.',de:'Der Vorschlag ist finanziell umsetzbar.',en:'The proposal is financially feasible.'}},
-{hu:'árnyalt',de:'nuanciert',en:'nuanced',level:'B2',topic:'Kommunikáció',ex:{hu:'A kérdés árnyalt megközelítést igényel.',de:'Die Frage erfordert eine nuancierte Betrachtung.',en:'The question requires a nuanced approach.'}}
+const nav = [
+  ['home', 'Kezdőlap', House],
+  ['learn', 'Tanulás', BookOpen],
+  ['practice', 'Gyakorlás', Target],
+  ['test', 'Teszt', ClipboardList],
+  ['cards', 'Szókártyák', Layers],
+  ['dictionary', 'Szókincs', Search],
+  ['stats', 'Statisztika', ChartColumn],
+  ['settings', 'Beállítások', Settings]
 ];
-const nav=[['home','Kezdőlap',House],['learn','Tanulás',BookOpen],['practice','Gyakorlás',Target],['test','Teszt',ClipboardList],['cards','Szókártyák',Layers],['dictionary','Szókincs',Search],['stats','Statisztika',ChartColumn],['settings','Beállítások',Settings]];
-function App(){
- const [view,setView]=useState('home'),[level,setLevel]=useState('A1'),[pair,setPair]=useState('hu-en'),[idx,setIdx]=useState(0),[flip,setFlip]=useState(false),[known,setKnown]=useState(()=>Number(localStorage.getItem('tl-known')||0)),[query,setQuery]=useState(''),[practice,setPractice]=useState(null),[feedback,setFeedback]=useState(''),[test,setTest]=useState(null);
- const src=pair.split('-')[0],dst=pair.split('-')[1];
- const list=useMemo(()=>vocab.filter(w=>w.level===level),[level]);
- const word=list[idx%Math.max(list.length,1)]||vocab[0];
- const switchView=v=>{setView(v);setFeedback('');if(v==='practice')newPractice();if(v==='test')setTest(null)};
- function next(){setIdx(i=>(i+1)%Math.max(list.length,1));setFlip(false)}
- function newPractice(){let pool=vocab.filter(w=>w.level===level);if(!pool.length)pool=vocab;const w=pool[Math.floor(Math.random()*pool.length)];const opts=[w,...vocab.filter(x=>x!==w).sort(()=>Math.random()-.5).slice(0,3)].sort(()=>Math.random()-.5);setPractice({w,opts});setFeedback('')}
- function answer(o){setFeedback(o===practice.w?'✓ Helyes!':'✗ Helyes válasz: '+practice.w[dst]);}
- function mark(){let n=known+1;setKnown(n);localStorage.setItem('tl-known',n);next()}
- function startTest(){setTest({n:0,score:0,q:makeQ()})}
- function makeQ(){let w=vocab[Math.floor(Math.random()*vocab.length)];return {w,opts:[w,...vocab.filter(x=>x!==w).sort(()=>Math.random()-.5).slice(0,3)].sort(()=>Math.random()-.5)}}
- function testAnswer(o){let n=test.n+1,s=test.score+(o===test.q.w?1:0);if(n===10)setTest({n,score:s,done:true});else setTest({n,score:s,q:makeQ()})}
- return <div className="layout"><aside className="sidebar"><div className="brand">◉ <span>TriLingua</span><small>Magyar · Német · Angol</small></div><nav>{nav.map(([id,label,Icon])=><button className={view===id?'active':''} onClick={()=>switchView(id)} key={id}><Icon size={19}/>{label}</button>)}</nav><div className="sidebottom">🌱 Minden nap egy új szó!</div></aside>
- <main><header className="top"><div><h1>{view==='home'?'Szia! 👋':nav.find(x=>x[0]===view)?.[1]}</h1><p>Tanulj szavakat és kifejezéseket a saját tempódban.</p></div><span className="streak"><Flame size={18}/> 5 napos sorozat</span></header>
- <section className="panel controls"><label>Tanulási nyelvpár<select value={pair} onChange={e=>setPair(e.target.value)}><option value="hu-en">🇭🇺 Magyar → 🇬🇧 Angol</option><option value="hu-de">🇭🇺 Magyar → 🇩🇪 Német</option><option value="de-hu">🇩🇪 Német → 🇭🇺 Magyar</option><option value="en-hu">🇬🇧 Angol → 🇭🇺 Magyar</option><option value="en-de">🇬🇧 Angol → 🇩🇪 Német</option><option value="de-en">🇩🇪 Német → 🇬🇧 Angol</option></select></label><div><b>Szint</b><div className="levels">{['A1','A2','B1','B2'].map(l=><button className={level===l?'selected':''} onClick={()=>{setLevel(l);setIdx(0)}} key={l}>{l}</button>)}</div></div><span className="muted push">Szókincs cél: 5 000–10 000+ szó</span></section>
- {view==='home'&&<><div className="hero"><section className="panel purple"><h2>{level} szint – Haladásod</h2><div className="bar"><i style={{width:Math.min(100,known/10)+'%'}}/></div><div className="statsrow"><span>📖 {known} megtanult szó</span><span>◎ 12 lecke</span><span>☆ 5 teszt</span></div><section className="panel goal"><h3>🎯 Napi cél</h3>Tanulj meg ma 20 új szót!<div className="bar"><i style={{width:'60%'}}/></div><b>12 / 20 szó</b></section></section></div><h2 className="sectiontitle">Mit szeretnél ma csinálni?</h2><div className="actions">{[['learn','📖','Új szavak tanulása','Tematikus leckék, példamondatokkal.'],['practice','🔄','Gyakorlás','Ismétlés, párosítás, kvízek.'],['test','📝','Teszt','Tudd meg, mennyit tudsz!'],['cards','🗂️','Szókártyák','Gyors ismétlés, bárhol, bármikor.']].map(([v,e,t,d])=><article className="action" key={v}><span>{e}</span><h3>{t}</h3><p>{d}</p><button className="btn" onClick={()=>switchView(v)}>Megnyitás <ChevronRight size={16}/></button></article>)}</div><div className="panel tablepanel"><h3>Példa a mai leckéből – A1: Utazás</h3><WordsTable rows={vocab.slice(0,5)}/></div></>}
- {view==='learn'&&<section className="panel center"><h2>📖 Új szavak tanulása</h2><p className="muted">{word.topic} · {word.level} · {idx+1}/{list.length||1}</p><div className="bigword">{word[src]}</div><div className="translation">{word[dst]}</div><div className="example"><b>Példamondat</b><p>{word.ex[src]}</p><small>{word.ex[dst]}</small></div><button className="btn ghost" onClick={()=>setIdx(i=>Math.max(0,i-1))}><ArrowLeft/> Előző</button> <button className="btn" onClick={next}>Következő <ArrowRight/></button> <button className="btn green" onClick={mark}><Check/> Ismerem</button></section>}
- {view==='practice'&&<section className="panel center"><h2>🔄 Gyakorlás</h2><p>Válaszd ki a megfelelő fordítást!</p>{practice&&<><div className="bigword">{practice.w[src]}</div><div className="choices">{practice.opts.map(o=><button key={o.hu} onClick={()=>answer(o)}>{o[dst]}</button>)}</div><p className="feedback">{feedback}</p><button className="btn" onClick={newPractice}>Új kérdés ↻</button></>}</section>}
- {view==='test'&&<section className="panel center"><h2>📝 Szintfelmérő teszt</h2>{!test?<><p>10 kérdéses mini teszt – a végén pontszámot kapsz.</p><button className="btn" onClick={startTest}>Teszt indítása</button></>:test.done?<><div className="bigword">{test.score}/10</div><p>{test.score>=8?'Nagyszerű eredmény!':'Gyakorolj még egy kicsit, és próbáld újra!'}</p><button className="btn" onClick={startTest}>Új teszt</button></>:<><p>{test.n+1}/10 kérdés</p><div className="bigword">{test.q.w[src]}</div><div className="choices">{test.q.opts.map(o=><button key={o.hu} onClick={()=>testAnswer(o)}>{o[dst]}</button>)}</div></>}</section>}
- {view==='cards'&&<section className="panel center"><h2>🗂️ Szókártyák</h2><p className="muted">Kattints a kártyára a fordításért.</p><div className="flash" onClick={()=>setFlip(!flip)}>{flip?<><div className="translation">{word[dst]}</div><p>{word.ex[src]}</p><small>{word.ex[dst]}</small></>:<div className="bigword">{word[src]}</div>}<small> • Kattints a fordításhoz • </small></div><button className="btn" onClick={next}>Következő kártya →</button></section>}
- {view==='dictionary'&&<section className="panel"><h2>🔎 Szókincs</h2><div className="search"><Search/><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Keress magyar, német vagy angol szóra…"/></div><WordsTable rows={vocab.filter(w=>Object.values(w).some(x=>typeof x==='string'&&x.toLowerCase().includes(query.toLowerCase())))}/></section>}
- {view==='stats'&&<section className="panel"><h2>📊 Tanulási statisztika</h2><div className="statsrow"><b>📖 {known} megtanult szó</b><b>🎯 12 lecke</b><b>🏆 5 teszt</b></div><p>Az ismert szavak száma a böngészőben mentésre kerül.</p></section>}
- {view==='settings'&&<section className="panel"><h2>⚙️ Beállítások</h2><p>Nyelvpár és szint beállítása a fenti vezérlőkkel.</p><button className="btn ghost" onClick={()=>{localStorage.removeItem('tl-known');setKnown(0)}}>Haladás törlése</button></section>}
- <footer>TriLingua · Prototípus · A tanulási haladás ezen az eszközön tárolódik.</footer></main></div>
+
+function shuffled(items) {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
 }
-function WordsTable({rows}){return <div className="tablewrap"><table><thead><tr><th>Magyar</th><th>Német</th><th>Angol</th><th>Szint</th><th>Példamondat</th></tr></thead><tbody>{rows.map((w,i)=><tr key={i}><td>{w.hu}</td><td>{w.de}</td><td>{w.en}</td><td><span className="badge">{w.level}</span></td><td>{w.ex.hu}<small>{w.ex.en}</small></td></tr>)}</tbody></table></div>}
-createRoot(document.getElementById('root')).render(<App/>);
+
+function App() {
+  const [vocab, setVocab] = useState([]);
+  const [loadError, setLoadError] = useState('');
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const [view, setView] = useState('home');
+  const [level, setLevel] = useState('A1');
+  const [idx, setIdx] = useState(0);
+  const [flip, setFlip] = useState(false);
+  const [known, setKnown] = useState(() => Number(localStorage.getItem('tl-known') || 0));
+  const [query, setQuery] = useState('');
+  const [practice, setPractice] = useState(null);
+  const [feedback, setFeedback] = useState('');
+  const [test, setTest] = useState(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch(`${import.meta.env.BASE_URL}vocab.json`, { signal: controller.signal })
+      .then(response => {
+        if (!response.ok) throw new Error(`Szókincs letöltése sikertelen (${response.status}).`);
+        return response.json();
+      })
+      .then(words => {
+        if (!Array.isArray(words) || words.length !== 5000) {
+          throw new Error('A szókincs adatfájlja nem tartalmazza mind az 5 000 bejegyzést.');
+        }
+        setVocab(words);
+        setLoadError('');
+      })
+      .catch(error => {
+        if (error.name === 'AbortError') return;
+        console.error('Nem sikerült betölteni a német–magyar szókincset.', error);
+        setLoadError('A szókincs betöltése nem sikerült. Ellenőrizd a kapcsolatot, majd próbáld újra.');
+      });
+    return () => controller.abort();
+  }, [loadAttempt]);
+
+  const list = useMemo(() => vocab.filter(word => word.level === level), [level]);
+  const word = list[idx % Math.max(list.length, 1)] || vocab[0];
+  const filteredWords = useMemo(() => {
+    const term = query.trim().toLocaleLowerCase('hu');
+    if (!term) return vocab;
+    return vocab.filter(item => [
+      item.de,
+      item.hu,
+      ...item.alternatives,
+      item.ex.de,
+      item.ex.hu
+    ].some(value => value.toLocaleLowerCase('hu').includes(term)));
+  }, [query]);
+
+  function makeQuestion(pool = list) {
+    const correct = pool[Math.floor(Math.random() * pool.length)];
+    const distractors = shuffled(vocab.filter(item => item !== correct)).slice(0, 3);
+    return { word: correct, options: shuffled([correct, ...distractors]) };
+  }
+
+  function switchView(nextView) {
+    setView(nextView);
+    setFeedback('');
+    if (nextView === 'practice') setPractice(makeQuestion());
+    if (nextView === 'test') setTest(null);
+  }
+
+  function next() {
+    setIdx(index => (index + 1) % Math.max(list.length, 1));
+    setFlip(false);
+  }
+
+  function newPractice() {
+    setPractice(makeQuestion());
+    setFeedback('');
+  }
+
+  function answer(option) {
+    setFeedback(option === practice.word ? '✓ Helyes!' : `✗ Helyes válasz: ${practice.word.hu}`);
+  }
+
+  function mark() {
+    const count = known + 1;
+    setKnown(count);
+    localStorage.setItem('tl-known', String(count));
+    next();
+  }
+
+  function startTest() {
+    setTest({ n: 0, score: 0, question: makeQuestion(vocab) });
+  }
+
+  function testAnswer(option) {
+    const n = test.n + 1;
+    const score = test.score + (option === test.question.word ? 1 : 0);
+    if (n === 10) setTest({ n, score, done: true });
+    else setTest({ n, score, question: makeQuestion(vocab) });
+  }
+
+  if (loadError) {
+    return <main className="panel center"><h1>Nem sikerült betölteni a szókincset</h1><p>{loadError}</p><button className="btn" onClick={() => setLoadAttempt(attempt => attempt + 1)}>Újrapróbálom</button></main>;
+  }
+  if (!vocab.length) return <main className="panel center"><p>Az 5 000 német–magyar szópár betöltése…</p></main>;
+
+  return (
+    <div className="layout">
+      <aside className="sidebar">
+        <div className="brand">◉ <span>TriLingua</span><small>Német · Magyar</small></div>
+        <nav>
+          {nav.map(([id, label, Icon]) => (
+            <button className={view === id ? 'active' : ''} onClick={() => switchView(id)} key={id}>
+              <Icon size={19} />{label}
+            </button>
+          ))}
+        </nav>
+        <div className="sidebottom">🌱 Minden nap egy új szó!</div>
+      </aside>
+
+      <main>
+        <header className="top">
+          <div>
+            <h1>{view === 'home' ? 'Szia! 👋' : nav.find(item => item[0] === view)?.[1]}</h1>
+            <p>Tanulj német szavakat magyar fordításokkal és példamondatokkal.</p>
+          </div>
+          <span className="streak"><Flame size={18} /> {vocab.length.toLocaleString('hu')} szópár</span>
+        </header>
+
+        <section className="panel controls">
+          <div className="language-pair"><span>Tanulási irány</span><strong>🇩🇪 Német → 🇭🇺 Magyar</strong></div>
+          <div>
+            <b>Szint</b>
+            <div className="levels">
+              {['A1', 'A2', 'B1', 'B2'].map(item => (
+                <button className={level === item ? 'selected' : ''} onClick={() => { setLevel(item); setIdx(0); }} key={item}>
+                  {item}
+                </button>
+              ))}
+            </div>
+          </div>
+          <span className="muted push">5 000 német–magyar bejegyzés</span>
+        </section>
+
+        {view === 'home' && (
+          <>
+            <div className="hero">
+              <section className="panel purple">
+                <h2>{level} szint – Haladásod</h2>
+                <div className="bar"><i style={{ width: `${Math.min(100, (known / vocab.length) * 100)}%` }} /></div>
+                <div className="statsrow">
+                  <span>📖 {known} megjelölt szó</span>
+                  <span>📚 {vocab.length.toLocaleString('hu')} szópár</span>
+                  <span>🎯 4 tanulási szint</span>
+                </div>
+                <section className="panel goal">
+                  <h3>🎯 Szótanulási haladás</h3>
+                  Jelöld meg az ismert szavakat tanulás közben.
+                  <div className="bar"><i style={{ width: `${Math.min(100, (known / vocab.length) * 100)}%` }} /></div>
+                  <b>{Math.min(known, vocab.length)} / {vocab.length.toLocaleString('hu')} szó</b>
+                </section>
+              </section>
+            </div>
+            <h2 className="sectiontitle">Mit szeretnél ma csinálni?</h2>
+            <div className="actions">
+              {[
+                ['learn', '📖', 'Új szavak tanulása', 'Német szavak magyar fordítással.'],
+                ['practice', '🔄', 'Gyakorlás', 'Válaszd ki a helyes magyar jelentést.'],
+                ['test', '📝', 'Teszt', '10 kérdéses német–magyar teszt.'],
+                ['cards', '🗂️', 'Szókártyák', 'Ismételd a szavakat példamondatokkal.']
+              ].map(([destination, emoji, title, description]) => (
+                <article className="action" key={destination}>
+                  <span>{emoji}</span><h3>{title}</h3><p>{description}</p>
+                  <button className="btn" onClick={() => switchView(destination)}>Megnyitás <ChevronRight size={16} /></button>
+                </article>
+              ))}
+            </div>
+            <div className="panel tablepanel">
+              <h3>Példa a mai leckéből – {level}</h3>
+              <WordsTable rows={list.slice(0, 5)} />
+            </div>
+          </>
+        )}
+
+        {view === 'learn' && (
+          <section className="panel center">
+            <h2>📖 Német szavak tanulása</h2>
+            <p className="muted">{word.topic} · {word.level} · {idx + 1}/{list.length}</p>
+            <div className="bigword">{word.de}</div>
+            <div className="translation">{word.hu}</div>
+            {word.alternatives.length > 0 && <p className="muted">További jelentések: {word.alternatives.join('; ')}</p>}
+            <Example word={word} />
+            <button className="btn ghost" onClick={() => setIdx(index => Math.max(0, index - 1))}><ArrowLeft /> Előző</button>{' '}
+            <button className="btn" onClick={next}>Következő <ArrowRight /></button>{' '}
+            <button className="btn green" onClick={mark}><Check /> Ismerem</button>
+          </section>
+        )}
+
+        {view === 'practice' && (
+          <section className="panel center">
+            <h2>🔄 Gyakorlás</h2>
+            <p>Válaszd ki a német szó magyar fordítását!</p>
+            {practice && (
+              <>
+                <div className="bigword">{practice.word.de}</div>
+                <div className="choices">
+                  {practice.options.map(option => <button key={option.de} onClick={() => answer(option)}>{option.hu}</button>)}
+                </div>
+                <p className="feedback">{feedback}</p>
+                <button className="btn" onClick={newPractice}>Új kérdés ↻</button>
+              </>
+            )}
+          </section>
+        )}
+
+        {view === 'test' && (
+          <section className="panel center">
+            <h2>📝 Német–magyar szintfelmérő</h2>
+            {!test ? (
+              <><p>10 kérdéses teszt – válaszd ki a német szó magyar fordítását.</p><button className="btn" onClick={startTest}>Teszt indítása</button></>
+            ) : test.done ? (
+              <><div className="bigword">{test.score}/10</div><p>{test.score >= 8 ? 'Nagyszerű eredmény!' : 'Gyakorolj még egy kicsit, és próbáld újra!'}</p><button className="btn" onClick={startTest}>Új teszt</button></>
+            ) : (
+              <><p>{test.n + 1}/10 kérdés</p><div className="bigword">{test.question.word.de}</div>
+                <div className="choices">
+                  {test.question.options.map(option => <button key={option.de} onClick={() => testAnswer(option)}>{option.hu}</button>)}
+                </div>
+              </>
+            )}
+          </section>
+        )}
+
+        {view === 'cards' && (
+          <section className="panel center">
+            <h2>🗂️ Német–magyar szókártyák</h2>
+            <p className="muted">Kattints a kártyára a fordításhoz.</p>
+            <div className="flash" onClick={() => setFlip(value => !value)}>
+              {flip ? <><div className="translation">{word.hu}</div><Example word={word} /></> : <div className="bigword">{word.de}</div>}
+              <small> • Kattints a fordításhoz • </small>
+            </div>
+            <button className="btn" onClick={next}>Következő kártya →</button>
+          </section>
+        )}
+
+        {view === 'dictionary' && (
+          <section className="panel">
+            <h2>🔎 Német–magyar szókincs</h2>
+            <div className="search">
+              <Search />
+              <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Keress német vagy magyar szóra…" />
+            </div>
+            <p className="muted">{filteredWords.length.toLocaleString('hu')} találat · legfeljebb 100 sor jelenik meg</p>
+            <WordsTable rows={filteredWords.slice(0, 100)} />
+          </section>
+        )}
+
+        {view === 'stats' && (
+          <section className="panel">
+            <h2>📊 Tanulási statisztika</h2>
+            <div className="statsrow">
+              <b>📖 {known} megjelölt szó</b>
+              <b>📚 {vocab.length.toLocaleString('hu')} szópár</b>
+              <b>🎯 4 tanulási szint</b>
+            </div>
+            <p>A megjelölt szavak száma a böngésző helyi tárhelyén tárolódik.</p>
+          </section>
+        )}
+
+        {view === 'settings' && (
+          <section className="panel">
+            <h2>⚙️ Beállítások</h2>
+            <p>A tanulási irány rögzített: német → magyar. Válassz szintet a fenti vezérlőkkel.</p>
+            <button className="btn ghost" onClick={() => { localStorage.removeItem('tl-known'); setKnown(0); }}>Haladás törlése</button>
+          </section>
+        )}
+
+        <footer>TriLingua · Német–magyar szókincs · A haladás ezen az eszközön tárolódik.</footer>
+      </main>
+    </div>
+  );
+}
+
+function Example({ word }) {
+  return (
+    <div className="example">
+      <b>Példamondat</b>
+      <p>{word.ex.de}</p>
+      <small>{word.ex.hu}</small>
+      <small className="example-source">
+        Forrás: <a href={word.exampleSource[0]} target="_blank" rel="noreferrer">Tatoeba (német)</a>
+        {' · '}
+        <a href={word.exampleSource[1]} target="_blank" rel="noreferrer">Tatoeba (magyar)</a>
+        {' · '}
+        <a href={word.source} target="_blank" rel="noreferrer">Wiktionary</a>
+      </small>
+    </div>
+  );
+}
+
+function WordsTable({ rows }) {
+  return (
+    <div className="tablewrap">
+      <table>
+        <thead><tr><th>Német</th><th>Magyar</th><th>Szint</th><th>Szófaj</th><th>Példamondat (DE / HU)</th></tr></thead>
+        <tbody>
+          {rows.map(item => (
+            <tr key={item.de}>
+              <td>{item.de}</td>
+              <td>{item.hu}{item.alternatives.length > 0 && <small>{item.alternatives.join('; ')}</small>}</td>
+              <td><span className="badge">{item.level}</span></td>
+              <td>{item.topic}</td>
+              <td>{item.ex.de}<small>{item.ex.hu}</small><small><a href={item.exampleSource[0]} target="_blank" rel="noreferrer">Tatoeba (DE)</a>{' · '}<a href={item.exampleSource[1]} target="_blank" rel="noreferrer">Tatoeba (HU)</a></small></td>
+            </tr>
+          ))}
+          {rows.length === 0 && <tr><td colSpan="5">Nincs találat.</td></tr>}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+createRoot(document.getElementById('root')).render(<App />);
